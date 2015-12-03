@@ -15,7 +15,7 @@
       
      Counting unique values:
       
-       (set!       \"chat.user.email\"   \"nikita@cognician.com\")
+       (set!       \"chat.user.email\"   \"nikita@mailforspam.com\")
       
      Supported opts (third argument):
       
