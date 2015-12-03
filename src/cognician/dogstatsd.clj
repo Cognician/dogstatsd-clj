@@ -23,9 +23,9 @@
          :sample-rate => Double[0..1] }
       
      E.g. (increment! \"chat.request.count\" 1
-            { :tags        { :env \"production\", :c3 nil } ;; => |#env:production,c3
-              :tags        [ \"env:production\"  \"c3\" ]   ;; => |#env:production,c3
-              :sample-rate 0.5 }                            ;; Throttling 50%"}
+            { :tags        { :env \"production\", :chat nil } ;; => |#env:production,chat
+              :tags        [ \"env:production\"  \"chat\" ]   ;; => |#env:production,chat
+              :sample-rate 0.5 }                              ;; Throttling 50%"}
   cognician.dogstatsd
   (:require
     [clojure.string :as str])
@@ -154,8 +154,8 @@
 (defn event!
   "title => String
    text  => String
-   opts? => { :tags             => [String+] | { Keyword -> Any | Nil }
-              :data-happened    => #inst
+   opts  => { :tags             => [String+] | { Keyword -> Any | Nil }
+              :date-happened    => #inst
               :hostname         => String
               :aggregation-key  => String
               :priority         => :normal | :low
