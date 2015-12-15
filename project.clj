@@ -1,4 +1,4 @@
-(defproject cognician/dogstatsd-clj "0.1.0"
+(defproject cognician/dogstatsd-clj "0.1.1"
   :description "Clojure client for DogStatsD, Datadog’s StatsD agent"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}

@@ -61,8 +61,11 @@
 ;;   (println "[ metrics ]" payload)
   (if-let [{:keys [socket addr]} @*state]
     (let [bytes (.getBytes payload "UTF-8")]
-      (.send ^DatagramSocket socket
-             (DatagramPacket. bytes (alength bytes) ^InetSocketAddress addr)))))
+      (try
+        (.send ^DatagramSocket socket
+               (DatagramPacket. bytes (alength bytes) ^InetSocketAddress addr))
+        (catch Exception e
+          (.printStackTrace e))))))
 
 
 (defn- format-tags [& tag-colls]

@@ -5,7 +5,7 @@
 Add to project.clj:
 
 ```clj
-[cognician/dogstatsd-clj "0.1.0"]
+[cognician/dogstatsd-clj "0.1.1"]
 ```
 
 Require it:
@@ -118,6 +118,15 @@ where opts could contain any subset of:
                                  :sample-rate 0.5})
 ```
 
+## CHANGES
+
+*0.1.1*
+
+- Metric reporting methods now catch all errors, print them to stderr and continue
+
+*0.1.0*
+
+- Initial release
 
 ## License
 
