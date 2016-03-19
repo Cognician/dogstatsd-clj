@@ -1,5 +1,5 @@
 (ns ^{:doc
-"    (configure! \"localhost:8125\")
+     "    (configure! \"localhost:8125\")
      
      Total value/rate:
       
@@ -48,16 +48,18 @@
      (configure! \"localhost:8125\" {:tags {:env \"production\"}})"
   ([uri] (configure! uri {}))
   ([uri opts]
-    (when-let [[_ host port] (and uri (re-matches #"([^:]*)(?:\:(\d+))?" uri))]
-      (let [host   (if (str/blank? host) "localhost" host)
-            port   (if (str/blank? port) 8125 port)
-            port   (if (string? port) (Integer/parseInt port) port)]
-        (reset! *state (merge (select-keys opts [:tags])
-                         { :socket (DatagramSocket.)
-                           :addr   (InetSocketAddress. host port) }))))))
+   (when-let [[_ host port] (and uri (re-matches #"([^:]*)(?:\:(\d+))?" uri))]
+     (let [host   (if (str/blank? host) "localhost" host)
+           port   (if (str/blank? port) 8125 port)
+           port   (if (string? port) (Integer/parseInt port) port)
+           socket ^java.net.SocketAddress (DatagramSocket.)
+           addr   ^java.net.InetSocketAddress (InetSocketAddress. ^String host ^Long port)]
+       (reset! *state (merge (select-keys opts [:tags])
+                             {:socket socket
+                              :addr addr}))))))
 
 
-(defn- send! [payload]
+(defn- send! [^String payload]
 ;;   (println "[ metrics ]" payload)
   (if-let [{:keys [socket addr]} @*state]
     (let [bytes (.getBytes payload "UTF-8")]
@@ -130,7 +132,7 @@
 (defn- format-event [title text opts]
   (let [title' (escape-event-string title)
         text'  (escape-event-string text)
-        {:keys [tags date-happened hostname aggregation-key
+        {:keys [tags ^java.util.Date date-happened hostname aggregation-key
                 priority source-type-name alert-type]} opts]
     (str "_e{" (count title') "," (count text') "}:" title' "|" text'
          (when date-happened
