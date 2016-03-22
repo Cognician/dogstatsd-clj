@@ -120,6 +120,10 @@ where opts could contain any subset of:
 
 ## CHANGES
 
+*0.1.2*
+
+- Remove reflection warnings
+
 *0.1.1*
 
 - Metric reporting methods now catch all errors, print them to stderr and continue
