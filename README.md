@@ -1,5 +1,9 @@
 # Clojure client for DogStatsD, Datadog’s StatsD agent
 
+For general information about DataDog, DogStatsD, how they're useful
+and why all this is useful - read the _Rationale, Context, additional
+documentation_ section below.
+
 ## Setting things up
 
 Add to project.clj:
@@ -11,7 +15,7 @@ Add to project.clj:
 Require it:
 
 ```clj
-(require '[cognician.dogstatsd :as d])
+(require '[cognician.dogstatsd :as dogstatsd])
 ```
 
 
@@ -20,13 +24,13 @@ Require it:
 To configure, provide URL of DogStatsD:
 
 ```clj
-(d/configure! "localhost:8125")
+(dogstatsd/configure! "localhost:8125")
 ```
 
 Optionally, you can provide set of global tags to be appended to every metric:
 
 ```clj
-(d/configure! "localhost:8125" { :tags {:env "production", :project "Secret"} })
+(dogstatsd/configure! "localhost:8125" { :tags {:env "production", :project "Secret"} })
 ```
 
 
@@ -37,32 +41,32 @@ After that, you can start reporting metrics:
 Total value/rate:
 
 ```clj
-(d/increment! "chat.request.count" 1)
+(dogstatsd/increment! "chat.request.count" 1)
 ```
 
 In-the-moment value:
 
 ```clj
-(d/gauge! "chat.ws.connections" 17)
+(dogstatsd/gauge! "chat.ws.connections" 17)
 ```
 
 Values distribution (mean, avg, max, percentiles):
 
 ```clj
-(d/histogram! "chat.request.time" 188.17)
+(dogstatsd/histogram! "chat.request.time" 188.17)
 ```
 
 To measure function execution time, use `d/measure!`:
 
 ```clj
-(d/measure! "thread.sleep.time" {}
+(dogstatsd/measure! "thread.sleep.time" {}
   (Thread/sleep 1000))
 ```
 
 Counting unique values:
 
 ```clj
-(d/set! "chat.user.email" "nikita@mailforspam.com")
+(dogstatsd/set! "chat.user.email" "nikita@mailforspam.com")
 ```
 
 
@@ -91,7 +95,7 @@ or as a vector:
 ## Events:
 
 ```clj
-(d/event! "title" "text" opts)
+(dogstatsd/event! "title" "text" opts)
 ```
 
 where opts could contain any subset of:
@@ -110,13 +114,69 @@ where opts could contain any subset of:
 ## Example
 
 ```clj
-(require '[cognician/dogstatsd :as d])
+(require '[cognician/dogstatsd :as dogstatsd])
 
-(d/configure! "localhost:8125" {:tags {:env "production"}})
+(dogstatsd/configure! "localhost:8125" {:tags {:env "production"}})
 
-(d/increment! "request.count" 1 {:tags ["endpoint:messages__list"]
+(dogstatsd/increment! "request.count" 1 {:tags ["endpoint:messages__list"]
                                  :sample-rate 0.5})
 ```
+
+## Rationale, context, additional documentation ##
+
+### Rationale and Context ###
+DataDog, being a monitoring service, has the ability, through their
+DogStatsD implementation, to collect and show important information
+like when things are happening, and how long those things take.
+
+An example is here:
+[Cog Validation
+Time](https://app.datadoghq.com/dash/211555/production-monolith?screenId=211555&screenName=production-monolith&from_ts=1544104800000&is_auto=false&live=true&page=0&to_ts=1544191200000&fullscreen_widget=399429687&tile_size=m)
+
+(It should show how long a validation function takes, which, over
+time, we hope to correlate with core dumps or slow service events)
+
+Because the data is pulled into DataDog, the graph widgets can be
+pulled into dashboards, so synchronisation and correlation can take
+place.
+
+### Local testing ###
+
+Since DogStatsD is DataDog's service, you'll want to tighten the loop
+on feedback and prevent contamination of production data with
+dev/testing info.
+
+An excellent package is
+[https://github.com/jonmorehouse/dogstatsd-local](https://github.com/jonmorehouse/dogstatsd-local) 
+
+It allows you to create a StatsD listener on localhost - and spits
+results out in the terminal when you make calls. The process is pretty
+straightforward:
+- Install go `brew install go` worked nicely enough
+- Clone the repository: `git clone https://github.com/jonmorehouse/dogstatsd-local.git` 
+- cd into the repository and enter `go build`
+- then, run `./dogstatsd-local -port=8126`
+
+dogstatsd-local is now listening on port 8126.
+
+You'll need to then tell whatever is using this library at
+configure-time to send requests to localhost:8126.
+
+To make this work for Manage, the following was
+added to the ~/.zshrc file:
+
+`export COGNICIAN_STATSD_URI="localhost:8126"`
+
+... then, when manage runs, it uses the configuration library, which
+ultimately reads this value from the system environment.
+
+Now, when manage is run in dev mode and instrumented code is hit, the results are
+available immediately in the terminal :)
+
+### Conventions ###
+Of course, you can do whatever you want, but it's much more convenient
+for everyone if you include it as "dogstatsd" - so searching across
+codebases is easier ;)
 
 ## CHANGES
 
